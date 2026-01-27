@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students & Results</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Students & Results</h1>
+            <p class="subtitle">View all student data and their performance</p>
+            <nav class="top-nav">
+                <a href="{% url 'frontend' %}" class="nav-link">Predict</a>
+                <a href="{% url 'students' %}" class="nav-link nav-link--active">Students & Results</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="students-header">
+                <h2>Student Records</h2>
+                <span class="students-meta">{{ students|length }} records</span>
+            </div>
+
+            {% if students %}
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Hours Studied</th>
+                            <th>Previous Scores</th>
+                            <th>Extracurricular</th>
+                            <th>Sleep Hours</th>
+                            <th>Sample Papers</th>
+                            <th>Actual Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ student.hours_studied }}</td>
+                            <td>{{ student.previous_scores }}</td>
+                            <td>{% if student.extracurricular %}Yes{% else %}No{% endif %}</td>
+                            <td>{{ student.sleep_hours }}</td>
+                            <td>{{ student.sample_papers }}</td>
+                            <td>
+                                <span class="badge {% if student.performance_index >= 70 %}badge--good{% elif student.performance_index >= 50 %}badge--warning{% else %}badge--bad{% endif %}">
+                                    {{ student.performance_index }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align:center;color:#6b7280;padding:24px 0;">No student records found. Load the dataset first.</p>
+            {% endif %}
+        </main>
+    </div>
+</body>
+</html>

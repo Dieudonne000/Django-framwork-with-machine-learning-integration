@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Performance Predictor</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Student Performance Predictor</h1>
+            <p class="subtitle">Predict student performance using Machine Learning</p>
+            <nav class="top-nav">
+                <a href="{% url 'frontend' %}" class="nav-link nav-link--active">Predict</a>
+                <a href="{% url 'students' %}" class="nav-link">Students & Results</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="form-container">
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="hours_studied">
+                            <span class="label-text">Hours Studied</span>
+                            <span class="label-icon"></span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="hours_studied" 
+                            name="hours_studied" 
+                            min="0" 
+                            max="24" 
+                            required
+                            placeholder="e.g., 6"
+                        >
+                        <small>Enter hours studied per day (0-24)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="previous_scores">
+                            <span class="label-text">Previous Scores</span>
+                            <span class="label-icon"></span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="previous_scores" 
+                            name="previous_scores" 
+                            min="0" 
+                            max="100" 
+                            required
+                            placeholder="e.g., 78"
+                        >
+                        <small>Enter previous exam scores (0-100)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="extracurricular">
+                            <span class="label-text">Extracurricular Activities</span>
+                            <span class="label-icon"></span>
+                        </label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="extracurricular" value="true" required>
+                                <span>Yes</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="extracurricular" value="false" required>
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sleep_hours">
+                            <span class="label-text">Sleep Hours</span>
+                            <span class="label-icon"></span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="sleep_hours" 
+                            name="sleep_hours" 
+                            min="0" 
+                            max="24" 
+                            required
+                            placeholder="e.g., 7"
+                        >
+                        <small>Enter average hours of sleep per night (0-24)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sample_papers">
+                            <span class="label-text">Sample Papers Practiced</span>
+                            <span class="label-icon"></span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="sample_papers" 
+                            name="sample_papers" 
+                            min="0" 
+                            max="20" 
+                            required
+                            placeholder="e.g., 3"
+                        >
+                        <small>Enter number of sample papers practiced</small>
+                    </div>
+
+                    <div id="validationMessage" class="validation-message" style="display: none;"></div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">Predict Performance</span>
+                        <span class="btn-loader" id="loader" style="display: none;"></span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="result-container" id="resultContainer" style="display: none;">
+                <div class="result-card">
+                    <h2>Prediction Result</h2>
+                    <div class="result-value">
+                        <span class="result-label">Predicted Performance Index:</span>
+                        <span class="result-number" id="resultValue">-</span>
+                    </div>
+                    <div class="result-bar">
+                        <div class="result-fill" id="resultBar"></div>
+                    </div>
+                    <button class="reset-btn" onclick="resetForm()">Make Another Prediction</button>
+                </div>
+            </div>
+
+            <div class="error-container" id="errorContainer" style="display: none;">
+                <div class="error-card">
+                    <span class="error-icon"></span>
+                    <p class="error-message" id="errorMessage"></p>
+                    <button class="reset-btn" onclick="resetForm()">Try Again</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="{% static 'script.js' %}"></script>
+</body>
+</html>
