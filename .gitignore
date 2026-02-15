@@ -24,7 +24,6 @@ db.sqlite3-journal
 *.joblib
 
 # IDE
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -32,3 +31,7 @@ db.sqlite3-journal
 # OS
 .DS_Store
 Thumbs.db
+.gitignore
+
+config.bat
+node_modules

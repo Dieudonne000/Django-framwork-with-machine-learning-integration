@@ -10,24 +10,59 @@ const resultValue = document.getElementById('resultValue');
 const resultBar = document.getElementById('resultBar');
 const errorMessage = document.getElementById('errorMessage');
 
-// Validation message element
+// Validation and warning elements
 const validationMessage = document.getElementById('validationMessage');
+const warningsContainer = document.getElementById('warningsContainer');
 
 // Get input elements for validation
 const hoursStudiedInput = document.getElementById('hours_studied');
 const sleepHoursInput = document.getElementById('sleep_hours');
+const previousScoresInput = document.getElementById('previous_scores');
+const samplePapersInput = document.getElementById('sample_papers');
 
-// Validation function: check that hours_studied + sleep_hours <= 24
-function validateHours() {
+// Realistic range warnings
+const WARNINGS = {
+    hours_studied: {
+        min: 1, max: 12,
+        lowMsg: (v) => `Warning: Studying only ${v} hour(s) per day is very low. Most students study at least 2-4 hours.`,
+        highMsg: (v) => `Warning: Studying ${v} hours per day is extreme and unsustainable. Even dedicated students rarely exceed 10-12 hours.`
+    },
+    sleep_hours: {
+        min: 5, max: 10,
+        lowMsg: (v) => `Warning: Sleeping only ${v} hour(s) is unhealthy. Adults need 7-9 hours; chronic sleep deprivation harms cognitive function.`,
+        highMsg: (v) => `Warning: Sleeping ${v} hours is excessive. Oversleeping may indicate health issues or reduced productive time.`
+    },
+    previous_scores: {
+        min: 20, max: 100,
+        lowMsg: (v) => `Note: A previous score of ${v} is very low. Consider if this is accurate.`,
+        highMsg: null // 100 is fine
+    },
+    sample_papers: {
+        min: 0, max: 15,
+        lowMsg: null, // 0 is fine
+        highMsg: (v) => `Note: Practicing ${v} sample papers is unusually high. Typical students practice 3-10 papers.`
+    }
+};
+
+// Combined hours validation (study + sleep must be <= 24)
+function validateTotalHours() {
     const hoursStudied = parseFloat(hoursStudiedInput.value) || 0;
     const sleepHours = parseFloat(sleepHoursInput.value) || 0;
     const total = hoursStudied + sleepHours;
     
     if (total > 24) {
-        validationMessage.textContent = `Invalid: Study (${hoursStudied}h) + Sleep (${sleepHours}h) = ${total}h exceeds 24 hours in a day.`;
+        validationMessage.textContent = `Invalid: Study (${hoursStudied}h) + Sleep (${sleepHours}h) = ${total}h exceeds 24 hours in a day. This is physically impossible.`;
+        validationMessage.className = 'validation-message validation-error';
         validationMessage.style.display = 'block';
         submitBtn.disabled = true;
         return false;
+    } else if (total > 20) {
+        // Warning: leaves very little time for eating, commuting, etc.
+        validationMessage.textContent = `Caution: Study (${hoursStudied}h) + Sleep (${sleepHours}h) = ${total}h leaves only ${24 - total} hour(s) for meals, commute, and other activities.`;
+        validationMessage.className = 'validation-message validation-warning';
+        validationMessage.style.display = 'block';
+        submitBtn.disabled = false;
+        return true;
     } else {
         validationMessage.style.display = 'none';
         submitBtn.disabled = false;
@@ -35,18 +70,73 @@ function validateHours() {
     }
 }
 
-// Add event listeners for real-time validation
-if (hoursStudiedInput && sleepHoursInput) {
-    hoursStudiedInput.addEventListener('input', validateHours);
-    sleepHoursInput.addEventListener('input', validateHours);
+// Check individual field warnings
+function checkFieldWarnings() {
+    const warnings = [];
+    
+    // Hours studied
+    const hoursStudied = parseFloat(hoursStudiedInput.value);
+    if (!isNaN(hoursStudied)) {
+        if (hoursStudied < WARNINGS.hours_studied.min && WARNINGS.hours_studied.lowMsg) {
+            warnings.push(WARNINGS.hours_studied.lowMsg(hoursStudied));
+        } else if (hoursStudied > WARNINGS.hours_studied.max && WARNINGS.hours_studied.highMsg) {
+            warnings.push(WARNINGS.hours_studied.highMsg(hoursStudied));
+        }
+    }
+    
+    // Sleep hours
+    const sleepHours = parseFloat(sleepHoursInput.value);
+    if (!isNaN(sleepHours)) {
+        if (sleepHours < WARNINGS.sleep_hours.min && WARNINGS.sleep_hours.lowMsg) {
+            warnings.push(WARNINGS.sleep_hours.lowMsg(sleepHours));
+        } else if (sleepHours > WARNINGS.sleep_hours.max && WARNINGS.sleep_hours.highMsg) {
+            warnings.push(WARNINGS.sleep_hours.highMsg(sleepHours));
+        }
+    }
+    
+    // Previous scores
+    const prevScores = parseFloat(previousScoresInput.value);
+    if (!isNaN(prevScores)) {
+        if (prevScores < WARNINGS.previous_scores.min && WARNINGS.previous_scores.lowMsg) {
+            warnings.push(WARNINGS.previous_scores.lowMsg(prevScores));
+        }
+    }
+    
+    // Sample papers
+    const samplePapers = parseFloat(samplePapersInput.value);
+    if (!isNaN(samplePapers)) {
+        if (samplePapers > WARNINGS.sample_papers.max && WARNINGS.sample_papers.highMsg) {
+            warnings.push(WARNINGS.sample_papers.highMsg(samplePapers));
+        }
+    }
+    
+    // Display warnings
+    if (warnings.length > 0 && warningsContainer) {
+        warningsContainer.innerHTML = warnings.map(w => `<div class="warning-item">${w}</div>`).join('');
+        warningsContainer.style.display = 'block';
+    } else if (warningsContainer) {
+        warningsContainer.style.display = 'none';
+    }
 }
+
+// Combined validation function
+function validateAll() {
+    validateTotalHours();
+    checkFieldWarnings();
+}
+
+// Add event listeners for real-time validation
+if (hoursStudiedInput) hoursStudiedInput.addEventListener('input', validateAll);
+if (sleepHoursInput) sleepHoursInput.addEventListener('input', validateAll);
+if (previousScoresInput) previousScoresInput.addEventListener('input', validateAll);
+if (samplePapersInput) samplePapersInput.addEventListener('input', validateAll);
 
 // Handle form submission
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     // Validate before submission
-    if (!validateHours()) {
+    if (!validateTotalHours()) {
         return;
     }
     
@@ -129,6 +219,7 @@ function resetForm() {
     resultContainer.style.display = 'none';
     errorContainer.style.display = 'none';
     if (validationMessage) validationMessage.style.display = 'none';
+    if (warningsContainer) warningsContainer.style.display = 'none';
     submitBtn.disabled = false;
     
     // Scroll to top
